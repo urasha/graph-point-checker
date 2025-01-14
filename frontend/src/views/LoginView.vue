@@ -1,46 +1,40 @@
 <script setup>
-import { ref } from 'vue';
+import {ref} from 'vue';
+import axios from "axios";
+import {useRouter} from "vue-router";
+import {useAuthenticationStore} from "@/store/authentication.store.js";
 
 const username = ref('');
 const password = ref('');
 
-const handleLogin = () => {
-  // TODO: remove logs
-  console.log("Username:", username.value);
-  console.log("Password:", password.value);
+const router = useRouter();
+const authenticationStore = useAuthenticationStore();
 
-  tryLogin();
-};
-
-const tryLogin = () => {
-  const request = {
-    method: 'POST',
-    headers: {
-      'Accept': 'application/json',
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify(
-      {
-        'username': username.value,
-        'password': password.value
-      })
-  };
-
-  fetch('/api/auth/login', request)
-    .then(response => {
-      if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`);
-      }
-      return response.json();
-    })
-    .then(data => {
-      console.log('Login response:', data);
-      // TODO: get JWT and save it
-    })
-    .catch(error => {
-      console.error(error);
+const handleLogin = async () => {
+  try {
+    const response = await axios.post('/api/users/login', {
+      username: username.value,
+      password: password.value,
     });
-}
+
+    if (response.status === 200) {
+      const token = response.data;
+
+      console.log('Login successful:', token);
+
+      localStorage.setItem('jwt', token);
+      authenticationStore.login();
+
+      await router.push('/');
+    }
+  } catch (error) {
+    if (error.response) {
+      console.error('Login failed: ', error.response.data);
+    } else {
+      console.error('Error during login: ', error.message);
+    }
+  }
+};
 </script>
 
 <template>
@@ -49,12 +43,12 @@ const tryLogin = () => {
     <form @submit.prevent="handleLogin">
       <div class="form-group">
         <label for="username">Имя пользователя</label>
-        <input type="text" id="username" v-model.trim="username" placeholder="Введите имя пользователя" required />
+        <input type="text" id="username" v-model.trim="username" placeholder="Введите имя пользователя" required/>
       </div>
 
       <div class="form-group">
         <label for="password">Пароль</label>
-        <input type="password" id="password" v-model.trim="password" placeholder="Введите пароль" required />
+        <input type="password" id="password" v-model.trim="password" placeholder="Введите пароль" required/>
       </div>
 
       <button type="submit" class="btn btn-primary">Войти</button>

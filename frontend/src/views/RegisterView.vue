@@ -1,48 +1,49 @@
 <script setup>
-import { ref } from 'vue';
+import {ref} from 'vue';
+import axios from "axios";
+import {useRouter} from "vue-router";
 
 const username = ref('');
 const password = ref('');
 const confirmPassword = ref('');
 
-const handleRegister = () => {
-  if (password.value !== confirmPassword.value) {
-    console.log('Passwords do not match');
+const router = useRouter();
+
+const handleRegister = async () => {
+  if (!validateForm()) {
+    // TODO: error message for user
     return;
   }
 
-  tryRegister();
+  try {
+    await tryRegister();
+  } catch (error) {
+    console.error('Registration error:', error.message);
+  }
+
+  await router.push('/login');
 };
 
-const tryRegister = () => {
-  const request = {
-    method: 'POST',
-    headers: {
-      'Accept': 'application/json',
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify(
-      {
-        'username': username.value,
-        'password': password.value
-      })
-  };
+const validateForm = () => {
+  return password && password === confirmPassword;
+};
 
-  fetch('/api/auth/register', request)
-    .then(response => {
-      if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`);
-      }
-      return response.json();
-    })
-    .then(data => {
-      console.log('Registration successful:', data);
-      // TODO: redirect to login page or show success message
-    })
-    .catch(error => {
-      console.error('Registration error:', error);
+const tryRegister = async () => {
+  try {
+    await axios.post('/api/users/register', {
+      username: username.value,
+      password: password.value
     });
-}
+
+    console.log('Registration successful');
+  } catch (error) {
+    if (error.response) {
+      console.error('Server error:', error.response.data);
+    } else {
+      console.error('Network or other error:', error.message);
+    }
+  }
+};
 </script>
 
 <template>
@@ -51,17 +52,18 @@ const tryRegister = () => {
     <form @submit.prevent="handleRegister">
       <div class="form-group">
         <label for="username">Имя пользователя</label>
-        <input type="text" id="username" v-model.trim="username" placeholder="Введите имя пользователя" required />
+        <input type="text" id="username" v-model.trim="username" placeholder="Введите имя пользователя" required/>
       </div>
 
       <div class="form-group">
         <label for="password">Пароль</label>
-        <input type="password" id="password" v-model.trim="password" placeholder="Введите пароль" required />
+        <input type="password" id="password" v-model.trim="password" placeholder="Введите пароль" required/>
       </div>
 
       <div class="form-group">
         <label for="confirm-password">Подтвердите пароль</label>
-        <input type="password" id="confirm-password" v-model.trim="confirmPassword" placeholder="Введите пароль ещё раз" required />
+        <input type="password" id="confirm-password" v-model.trim="confirmPassword" placeholder="Введите пароль ещё раз"
+               required/>
       </div>
 
       <button type="submit" class="btn btn-primary">Зарегистрироваться</button>

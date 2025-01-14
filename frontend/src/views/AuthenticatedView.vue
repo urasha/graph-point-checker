@@ -1,5 +1,5 @@
 <script setup>
-import { useAuthenticationStore } from '@/store/authentication-store';
+import { useAuthenticationStore } from '@/store/authentication.store.js';
 import { useRouter } from 'vue-router';
 import { onBeforeMount } from 'vue';
 
