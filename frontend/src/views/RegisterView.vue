@@ -6,43 +6,39 @@ import {useRouter} from "vue-router";
 const username = ref('');
 const password = ref('');
 const confirmPassword = ref('');
+const errorMessage = ref('');
 
 const router = useRouter();
 
 const handleRegister = async () => {
   if (!validateForm()) {
-    // TODO: error message for user
+    errorMessage.value = 'Логин и пароль не могут быть пустыми!'
     return;
   }
 
-  try {
-    await tryRegister();
-  } catch (error) {
-    console.error('Registration error:', error.message);
-  }
-
-  await router.push('/login');
+  await tryRegister();
 };
 
 const validateForm = () => {
-  return password && password === confirmPassword;
+  return username.value && password.value && password.value === confirmPassword.value;
 };
 
 const tryRegister = async () => {
-  try {
-    await axios.post('/api/users/register', {
-      username: username.value,
-      password: password.value
-    });
-
+  axios.post('/api/users/register', {
+    username: username.value,
+    password: password.value
+  }).then(response => {
     console.log('Registration successful');
-  } catch (error) {
-    if (error.response) {
-      console.error('Server error:', error.response.data);
+    router.push('/login');
+  }).catch(error => {
+    if (error.response.status === 401) {
+      const {message} = error.response.data;
+      errorMessage.value = message;
+      console.error(`Server error: ${message}`);
     } else {
-      console.error('Network or other error:', error.message);
+      console.error(`Network or other error: ${error.message}`);
     }
-  }
+  })
 };
 </script>
 
@@ -64,6 +60,10 @@ const tryRegister = async () => {
         <label for="confirm-password">Подтвердите пароль</label>
         <input type="password" id="confirm-password" v-model.trim="confirmPassword" placeholder="Введите пароль ещё раз"
                required/>
+      </div>
+
+      <div v-if="errorMessage" class="error-message">
+        {{ errorMessage }}
       </div>
 
       <button type="submit" class="btn btn-primary">Зарегистрироваться</button>
@@ -133,5 +133,11 @@ button:hover {
 
 .login-link a:hover {
   text-decoration: underline;
+}
+
+.error-message {
+  color: red;
+  font-size: 0.9rem;
+  margin-bottom: 15px;
 }
 </style>

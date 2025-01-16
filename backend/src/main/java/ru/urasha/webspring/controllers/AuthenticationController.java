@@ -35,7 +35,9 @@ public class AuthenticationController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<String> login(@RequestBody UserAccount user) {
+    public ResponseEntity<Map<String, String>> login(@RequestBody UserAccount user) {
+        Map<String, String> response;
+
         try {
             Authentication authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(user.getUsername(), user.getPassword()));
@@ -44,22 +46,28 @@ public class AuthenticationController {
             Optional<String> jwt = authenticationService.login(user);
 
             if (jwt.isEmpty()) {
-                throw new BadCredentialsException("Invalid username or password");
+                throw new BadCredentialsException("Неверные логин или пароль!");
             }
 
-            return new ResponseEntity<>(jwt.get(), HttpStatus.OK);
+            response = Map.of("jwt", jwt.get());
+            return new ResponseEntity<>(response, HttpStatus.OK);
         } catch (BadCredentialsException e) {
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.UNAUTHORIZED);
+            response = Map.of("message", "Неверные логин или пароль!");
+            return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
         }
     }
 
     @PostMapping("/register")
-    public ResponseEntity<Void> register(@RequestBody UserAccount user) {
+    public ResponseEntity<Map<String, String>> register(@RequestBody UserAccount user) {
+        Map<String, String> response;
+
         try {
             authenticationService.register(user);
-            return new ResponseEntity<>(HttpStatus.OK);
+            response = Map.of("message", "Регистрация прошла успешно");
+            return new ResponseEntity<>(response, HttpStatus.OK);
         } catch (BadCredentialsException e) {
-            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+            response = Map.of("message", e.getMessage());
+            return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
         }
     }
 }

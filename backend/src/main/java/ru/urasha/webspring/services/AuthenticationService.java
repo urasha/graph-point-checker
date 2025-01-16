@@ -34,7 +34,7 @@ public class AuthenticationService {
 
     public void register(UserAccount userAccount) throws BadCredentialsException {
         if (userAccountRepository.existsByUsername(userAccount.getUsername())) {
-            throw new BadCredentialsException("Username is already exists");
+            throw new BadCredentialsException("Такой пользователь уже существует!");
         }
 
         UserAccount user = new UserAccount();

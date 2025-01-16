@@ -8,12 +8,14 @@ import org.springframework.security.core.userdetails.UserDetails;
 import jakarta.persistence.*;
 import lombok.*;
 
+@Entity
+@Table(name = "user_account", indexes = {
+        @Index(name = "idx_username", columnList = "username")
+})
 @Getter
 @Setter
-@ToString
 @NoArgsConstructor
-@Entity
-@Table(name = "user_account")
+@ToString
 public class UserAccount implements UserDetails {
 
     @Id

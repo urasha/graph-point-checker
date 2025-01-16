@@ -6,34 +6,29 @@ import {useAuthenticationStore} from "@/store/authentication.store.js";
 
 const username = ref('');
 const password = ref('');
+const errorMessage = ref('');
 
 const router = useRouter();
 const authenticationStore = useAuthenticationStore();
 
 const handleLogin = async () => {
-  try {
-    const response = await axios.post('/api/users/login', {
-      username: username.value,
-      password: password.value,
-    });
+  axios.post('/api/users/login', {
+    username: username.value,
+    password: password.value,
+  }).then((response) => {
+    const {jwt} = response.data;
 
-    if (response.status === 200) {
-      const token = response.data;
+    console.log(`Login successful: ${jwt}`);
 
-      console.log('Login successful:', token);
+    localStorage.setItem('jwt', jwt);
+    authenticationStore.login();
 
-      localStorage.setItem('jwt', token);
-      authenticationStore.login();
-
-      await router.push('/');
-    }
-  } catch (error) {
-    if (error.response) {
-      console.error('Login failed: ', error.response.data);
-    } else {
-      console.error('Error during login: ', error.message);
-    }
-  }
+    router.push('/');
+  }).catch((error) => {
+    const {message} = error.response.data;
+    errorMessage.value = message;
+    console.error(`Login failed: ${message}`);
+  })
 };
 </script>
 
@@ -49,6 +44,10 @@ const handleLogin = async () => {
       <div class="form-group">
         <label for="password">Пароль</label>
         <input type="password" id="password" v-model.trim="password" placeholder="Введите пароль" required/>
+      </div>
+
+      <div v-if="errorMessage" class="error-message">
+        {{ errorMessage }}
       </div>
 
       <button type="submit" class="btn btn-primary">Войти</button>
@@ -119,5 +118,11 @@ button:hover {
 
 .register-link a:hover {
   text-decoration: underline;
+}
+
+.error-message {
+  color: red;
+  font-size: 0.9rem;
+  margin-bottom: 15px;
 }
 </style>
