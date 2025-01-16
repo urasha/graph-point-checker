@@ -7,7 +7,6 @@ import {useAuthenticationStore} from "@/store/authentication.store.js";
 const form = ref({x: 1, y: '', r: 2});
 const results = ref([]);
 const error = ref('');
-const username = ref(null);
 
 const router = useRouter();
 const authenticationStore = useAuthenticationStore();
@@ -15,7 +14,33 @@ const authenticationStore = useAuthenticationStore();
 const rangeX = [-2, -1.5, -1, -0.5, 0, 0.5, 1, 1.5, 2];
 const rangeR = [0, 0.5, 1, 1.5, 2];
 
-function validateY() {
+const handleSubmit = async () => {
+  if (error.value) {
+    return;
+  }
+
+  // TODO: try to send point to PointMicroService
+}
+
+const loadPreviousResults = async () => {
+  try {
+    /*
+    // TODO:
+    // if user is not authenticated -> logout()
+    // else: try to load all point from current user into the table
+    */
+  } catch (err) {
+    error.value = 'Ошибка загрузки данных';
+  }
+};
+
+const logout = () => {
+  localStorage.removeItem('jwt');
+  authenticationStore.logout();
+  router.push('/login');
+}
+
+const validateY = () => {
   const y = parseFloat(form.value.y);
   if (isNaN(y) || y < -5 || y > 5) {
     error.value = 'Y должен быть числом в диапазоне -5...5';
@@ -24,58 +49,17 @@ function validateY() {
   }
 }
 
-async function handleSubmit() {
-  if (error.value) return;
-  try {
-    const response = await fetch('/api/submit', {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify(form.value),
-    });
-    const data = await response.json();
-    if (data.success) {
-      results.value.push(data.result);
-    } else {
-      error.value = data.message || 'Ошибка при отправке данных';
-    }
-  } catch (err) {
-    error.value = 'Ошибка подключения к серверу';
-  }
-}
-
-function logout() {
-  localStorage.removeItem('jwt');
-  authenticationStore.logout();
-  router.push('/login');
-}
-
-onMounted(async () => {
-  try {
-    const response = await fetch('/api/results');
-    const data = await response.json();
-    results.value = data.results;
-
-    const userResponse = await fetch('/api/user');
-    const userData = await userResponse.json();
-    username.value = userData.username;
-
-    if (!username.value) {
-      logout();
-    }
-  } catch (err) {
-    error.value = 'Ошибка загрузки данных';
-  }
-});
+onMounted(loadPreviousResults);
 </script>
 
 <template>
   <div class="main-page">
-    <header class="header">
+    <header>
       <h2>Нестеров Владислав Алексеевич, P3210, вариант: 98743</h2>
-      <button class="logout-button" @click="logout">{{ username ? username : 'Выйти' }}</button>
+      <button class="logout-button" @click="logout">Выйти</button>
     </header>
 
-    <div class="horizontal-container">
+    <main>
       <section class="input-section">
         <h3>Ввод данных</h3>
         <form @submit.prevent="handleSubmit" class="input-form">
@@ -93,7 +77,7 @@ onMounted(async () => {
 
           <label>
             R:
-            <select v-model="form.r" required  class="select-input">
+            <select v-model="form.r" required class="select-input">
               <option v-for="option in rangeR" :key="option" :value="option">{{ option }}</option>
             </select>
           </label>
@@ -106,10 +90,10 @@ onMounted(async () => {
       <section class="graph-section">
         <Canvas :rValue="form.r"/>
       </section>
-    </div>
+    </main>
 
     <section class="results-section">
-      <h2>Таблица результатов</h2>
+      <h3>Таблица результатов</h3>
       <table class="results-table">
         <thead>
         <tr>
@@ -146,7 +130,7 @@ onMounted(async () => {
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
-.header {
+header {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -170,20 +154,24 @@ onMounted(async () => {
   background-color: #d32f2f;
 }
 
-.horizontal-container {
+main {
   display: flex;
   gap: 20px;
 }
 
-.input-section, .graph-section {
-  flex: 1;
+main > section {
   background-color: white;
   padding: 20px;
   border-radius: 10px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
+.input-section {
+  flex: 2;
+}
+
 .graph-section {
+  flex: 1;
   text-align: center
 }
 

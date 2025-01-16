@@ -2,10 +2,10 @@ networks:
   itmo:
 
 services:
-  backend:
+  user-service:
     build:
       context: ./
-      dockerfile: ./backend/Dockerfile
+      dockerfile: ./user-service/Dockerfile
     networks:
       - itmo
     ports:
@@ -37,4 +37,4 @@ services:
     networks:
       - itmo
     depends_on:
-      - backend
+      - user-service
