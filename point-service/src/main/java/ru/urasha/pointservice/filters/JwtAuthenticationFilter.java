@@ -1,26 +1,25 @@
-package ru.urasha.userservice.filters;
+package ru.urasha.pointservice.filters;
 
+import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.web.filter.OncePerRequestFilter;
 import ru.urasha.JwtTokenUtil;
 
 import java.io.IOException;
+import java.util.List;
 
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtTokenUtil jwtTokenUtil;
-    private final UserDetailsService userDetailsService;
 
-    public JwtAuthenticationFilter(JwtTokenUtil jwtTokenUtil, UserDetailsService userDetailsService) {
+    public JwtAuthenticationFilter(JwtTokenUtil jwtTokenUtil) {
         this.jwtTokenUtil = jwtTokenUtil;
-        this.userDetailsService = userDetailsService;
     }
 
     @Override
@@ -32,7 +31,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             String token = authHeader.substring(7);
 
             if (jwtTokenUtil.validateToken(token)) {
-                authenticateUserFromJwt(token);
+                parseJwtToken(token);
             } else {
                 response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                 response.getWriter().write("JWT токен невалидный или истекший");
@@ -42,18 +41,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         chain.doFilter(request, response);
     }
 
-    private void authenticateUserFromJwt(String jwtToken) {
-        String username = jwtTokenUtil.getUsernameFromToken(jwtToken);
-
-        UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+    private void parseJwtToken(String token) throws JwtException {
+        String username = jwtTokenUtil.getUsernameFromToken(token);
+        List<GrantedAuthority> authorities = jwtTokenUtil.getRolesFromToken(token);
 
         UsernamePasswordAuthenticationToken authentication =
-                new UsernamePasswordAuthenticationToken(
-                        userDetails,
-                        null,
-                        userDetails.getAuthorities()
-                );
-
+                new UsernamePasswordAuthenticationToken(username, null, authorities);
         SecurityContextHolder.getContext().setAuthentication(authentication);
     }
 }

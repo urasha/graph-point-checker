@@ -1,19 +1,30 @@
-package ru.urasha.userservice.services;
+package ru.urasha;
 
-import io.jsonwebtoken.*;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.JwtException;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Service;
 
 import java.security.Key;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class JwtTokenUtil {
 
-    @Value("${jwt.secret}")
-    private String SECRET_KEY;
+    private final String SECRET_KEY;
+
+    public JwtTokenUtil(@Value("${jwt.secret}") String SECRET_KEY) {
+        this.SECRET_KEY = SECRET_KEY;
+    }
 
     private static final long EXPIRATION_TIME = 86400000; // 1 day
 
@@ -53,5 +64,17 @@ public class JwtTokenUtil {
         } catch (JwtException e) {
             return false;
         }
+    }
+
+    public List<GrantedAuthority> getRolesFromToken(String token) {
+        Claims claims = Jwts.parserBuilder()
+                .setSigningKey(key)
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
+        String roles = claims.get("roles", String.class);
+        return Arrays.stream(roles.split(","))
+                .map(SimpleGrantedAuthority::new)
+                .collect(Collectors.toList());
     }
 }

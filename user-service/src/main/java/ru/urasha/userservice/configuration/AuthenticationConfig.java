@@ -15,9 +15,9 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import ru.urasha.JwtTokenUtil;
 import ru.urasha.userservice.filters.JwtAuthenticationFilter;
 import ru.urasha.userservice.repositories.UserAccountRepository;
-import ru.urasha.userservice.services.JwtTokenUtil;
 
 @Configuration
 @EnableWebSecurity

@@ -7,6 +7,7 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import ru.urasha.JwtTokenUtil;
 import ru.urasha.userservice.models.Role;
 import ru.urasha.userservice.models.UserAccount;
 import ru.urasha.userservice.repositories.UserAccountRepository;
