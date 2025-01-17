@@ -14,6 +14,17 @@ services:
       db:
         condition: service_healthy
 
+  point-service:
+    build:
+      context: ./
+      dockerfile: ./point-service/Dockerfile
+    networks:
+      - itmo
+    ports:
+      - "7070:7070"
+    depends_on:
+      - user-service
+
   db:
     image: container-registry.oracle.com/database/free:latest
     environment:
@@ -23,7 +34,7 @@ services:
     networks:
       - itmo
     healthcheck:
-      test: ["CMD", "sqlplus", "-s", "sys/password@FREE as sysdba", "SELECT 1 FROM dual"]
+      test: [ "CMD", "sqlplus", "-s", "sys/password@FREE as sysdba", "SELECT 1 FROM dual" ]
       interval: 10s
       timeout: 5s
       retries: 20

@@ -5,6 +5,9 @@ target/
 !**/src/test/**/target/
 .mvn/
 
+common-security/target
+common-security/target/*
+
 ### STS ###
 .apt_generated
 .classpath
@@ -32,3 +35,4 @@ build/
 
 ### VS Code ###
 .vscode/
+
