@@ -37,15 +37,13 @@ public class AuthenticationController {
         Map<String, String> response;
 
         try {
-            Authentication authentication = authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(user.getUsername(), user.getPassword()));
-            SecurityContextHolder.getContext().setAuthentication(authentication);
-
             Optional<String> jwt = authenticationService.login(user);
 
             if (jwt.isEmpty()) {
                 throw new BadCredentialsException("Неверные логин или пароль!");
             }
+
+            setAuthenticationContext(user);
 
             response = Map.of("jwt", jwt.get());
             return new ResponseEntity<>(response, HttpStatus.OK);
@@ -67,5 +65,11 @@ public class AuthenticationController {
             response = Map.of("message", e.getMessage());
             return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
         }
+    }
+
+    private void setAuthenticationContext(UserAccount user) {
+        Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(user.getUsername(), user.getPassword()));
+        SecurityContextHolder.getContext().setAuthentication(authentication);
     }
 }
