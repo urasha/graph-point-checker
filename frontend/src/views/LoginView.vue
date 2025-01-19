@@ -64,7 +64,7 @@ const handleLogin = async () => {
 <style scoped>
 .login-view {
   max-width: 400px;
-  margin: 50px auto;
+  margin: 20px auto;
   padding: 20px;
   border: 1px solid #ccc;
   border-radius: 8px;
@@ -116,13 +116,33 @@ button:hover {
   text-decoration: none;
 }
 
-.register-link a:hover {
-  text-decoration: underline;
-}
-
 .error-message {
   color: red;
   font-size: 0.9rem;
   margin-bottom: 15px;
+}
+
+@media (min-width: 892px) {
+  .login-view {
+    margin: 30px auto;
+  }
+  h1 {
+    font-size: 32px;
+  }
+  input, button {
+    font-size: 16px;
+  }
+}
+
+@media (min-width: 1202px) {
+  .login-view {
+    margin: 50px auto;
+  }
+  h1 {
+    font-size: 32px;
+  }
+  input, button {
+    font-size: 16px;
+  }
 }
 </style>

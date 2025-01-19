@@ -88,7 +88,7 @@ const tryRegister = async () => {
 <style scoped>
 .register-view {
   max-width: 400px;
-  margin: 50px auto;
+  margin: 20px auto;
   padding: 20px;
   border: 1px solid #ccc;
   border-radius: 8px;
@@ -148,5 +148,29 @@ button:hover {
   color: red;
   font-size: 0.9rem;
   margin-bottom: 15px;
+}
+
+@media (min-width: 892px) {
+  .register-view {
+    margin: 30px auto;
+  }
+  h1 {
+    font-size: 32px;
+  }
+  input, button {
+    font-size: 16px;
+  }
+}
+
+@media (min-width: 1202px) {
+  .register-view {
+    margin: 50px auto;
+  }
+  h1 {
+    font-size: 32px;
+  }
+  input, button {
+    font-size: 16px;
+  }
 }
 </style>

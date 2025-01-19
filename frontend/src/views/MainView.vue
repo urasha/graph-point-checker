@@ -213,7 +213,6 @@ watchEffect(() => {
   padding: 20px;
   background-color: #f9f9f9;
   color: #333;
-  max-width: 900px;
   margin: 0 auto;
   border-radius: 10px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
@@ -245,6 +244,7 @@ header {
 
 main {
   display: flex;
+  flex-direction: column;
   gap: 20px;
 }
 
@@ -261,7 +261,7 @@ main > section {
 
 .graph-section {
   flex: 1;
-  text-align: center
+  text-align: center;
 }
 
 .input-form {
@@ -302,6 +302,7 @@ main > section {
 .results-table {
   width: 100%;
   border-collapse: collapse;
+  overflow-x: auto;
 }
 
 .results-table th, .results-table td {
@@ -321,5 +322,52 @@ main > section {
 
 .results-table tr:hover {
   background-color: #f1f1f1;
+}
+
+@media (min-width: 892px) and (max-width: 1201px) {
+  main {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+
+  .input-section, .graph-section {
+    flex: 1 1 50%;
+    box-sizing: border-box;
+  }
+
+  .results-section {
+    flex: 1 1 100%;
+  }
+
+  .results-table {
+    font-size: 16px;
+  }
+}
+
+@media (min-width: 1202px) {
+  .main-page {
+    max-width: 1200px;
+  }
+
+  main {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+
+  .input-section {
+    flex: 2;
+  }
+
+  .graph-section {
+    flex: 1;
+  }
+
+  .results-section {
+    flex: 2;
+  }
+
+  .results-table {
+    font-size: 18px;
+  }
 }
 </style>
