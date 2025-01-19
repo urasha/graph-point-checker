@@ -7,34 +7,26 @@ import ru.urasha.pointservice.models.Point;
 public class HitChecker {
 
     public boolean checkHit(Point point) {
-        if (point.getX() < 0 & point.getY() < 0) {
+        double x = point.getX();
+        double y = point.getY();
+        double r = point.getR();
+
+        if (x < 0 & y < 0) {
             return false;
         }
 
-        return checkTriangle(point) || checkRectangle(point) || checkCircle(point);
+        return checkTriangle(x, y, r) || checkRectangle(x, y, r) || checkCircle(x, y, r);
     }
 
-    private boolean checkTriangle(Point point) {
-        double x = point.getX();
-        double y = point.getY();
-        double r = point.getR();
-
-        return x <= 0 && y >= 0 && y <= (-x + r / 2);
+    private boolean checkTriangle(double x, double y, double r) {
+        return x <= 0 && x >= -r / 2 && y >= 0 && y <= r && y <= 2 * x + r;
     }
 
-    private boolean checkRectangle(Point point) {
-        double x = point.getX();
-        double y = point.getY();
-        double r = point.getR();
-
+    private boolean checkRectangle(double x, double y, double r) {
         return x >= 0 && y <= 0 && x <= r && y >= -r;
     }
 
-    private boolean checkCircle(Point point) {
-        double x = point.getX();
-        double y = point.getY();
-        double r = point.getR();
-
+    private boolean checkCircle(double x, double y, double r) {
         return x >= 0 && y >= 0 && (x * x + y * y) <= ((r * r) / 4);
     }
 }
