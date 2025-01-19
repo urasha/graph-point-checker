@@ -346,7 +346,7 @@ main > section {
 
 @media (min-width: 1202px) {
   .main-page {
-    max-width: 1200px;
+    max-width: 1075px;
   }
 
   main {

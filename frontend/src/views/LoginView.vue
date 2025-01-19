@@ -122,7 +122,7 @@ button:hover {
   margin-bottom: 15px;
 }
 
-@media (min-width: 892px) {
+@media (min-width: 892px) and (max-width: 1201px)  {
   .login-view {
     margin: 30px auto;
   }
