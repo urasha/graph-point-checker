@@ -70,6 +70,12 @@
         </dependency>
 
         <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <version>42.7.5</version>
+        </dependency>
+
+        <dependency>
             <groupId>ru.urasha</groupId>
             <artifactId>commonsecurity</artifactId>
             <version>1.0.0</version>

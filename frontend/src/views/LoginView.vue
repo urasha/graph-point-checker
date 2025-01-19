@@ -7,28 +7,37 @@ import {useAuthenticationStore} from "@/store/authentication.store.js";
 const username = ref('');
 const password = ref('');
 const errorMessage = ref('');
+const isLoading = ref(false);
 
 const router = useRouter();
 const authenticationStore = useAuthenticationStore();
 
 const handleLogin = async () => {
+  isLoading.value = true;
+  errorMessage.value = '';
+
   axios.post('/api/users/login', {
     username: username.value,
     password: password.value,
-  }).then((response) => {
-    const {jwt} = response.data;
-
-    console.log(`Login successful: ${jwt}`);
-
-    localStorage.setItem('jwt', jwt);
-    authenticationStore.login();
-
-    router.push('/');
-  }).catch((error) => {
-    const {message} = error.response.data;
-    errorMessage.value = message;
-    console.error(`Login failed: ${message}`);
   })
+    .then((response) => {
+      const {jwt} = response.data;
+
+      console.log(`Login successful: ${jwt}`);
+
+      localStorage.setItem('jwt', jwt);
+      authenticationStore.login();
+
+      router.push('/');
+    })
+    .catch((error) => {
+      const {message} = error.response.data;
+      errorMessage.value = message;
+      console.error(`Login failed: ${message}`);
+    })
+    .finally(() => {
+      isLoading.value = false;
+    })
 };
 </script>
 
@@ -46,11 +55,15 @@ const handleLogin = async () => {
         <input type="password" id="password" v-model.trim="password" placeholder="Введите пароль" required/>
       </div>
 
+      <div v-if="isLoading" class="loading-message">
+        Загрузка...
+      </div>
+
       <div v-if="errorMessage" class="error-message">
         {{ errorMessage }}
       </div>
 
-      <button type="submit" class="btn btn-primary">Войти</button>
+      <button type="submit" class="btn btn-primary" :disabled="isLoading">Войти</button>
     </form>
 
     <div class="register-link">
@@ -69,6 +82,7 @@ const handleLogin = async () => {
   border: 1px solid #ccc;
   border-radius: 8px;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  position: relative;
 }
 
 h1 {
@@ -102,7 +116,12 @@ button {
   cursor: pointer;
 }
 
-button:hover {
+button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+button:hover:not(:disabled) {
   background-color: #0056b3;
 }
 
@@ -122,13 +141,20 @@ button:hover {
   margin-bottom: 15px;
 }
 
-@media (min-width: 892px) and (max-width: 1201px)  {
+.loading-message {
+  font-size: 0.9rem;
+  margin-bottom: 15px;
+}
+
+@media (min-width: 892px) and (max-width: 1201px) {
   .login-view {
     margin: 30px auto;
   }
+
   h1 {
     font-size: 32px;
   }
+
   input, button {
     font-size: 16px;
   }
@@ -138,9 +164,11 @@ button:hover {
   .login-view {
     margin: 50px auto;
   }
+
   h1 {
     font-size: 32px;
   }
+
   input, button {
     font-size: 16px;
   }

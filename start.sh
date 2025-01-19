@@ -1,3 +1,7 @@
+cd common-security
+mvn clean install
+cd ..
+
 cd user-service
 mvn clean package
 cd ..

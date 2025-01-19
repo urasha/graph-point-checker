@@ -36,18 +36,20 @@ const tryRegister = async () => {
   axios.post('/api/users/register', {
     username: username.value,
     password: password.value
-  }).then(response => {
-    console.log('Registration successful');
-    router.push('/login');
-  }).catch(error => {
-    if (error.response.status === 401) {
-      const {message} = error.response.data;
-      errorMessage.value = message;
-      console.error(`Server error: ${message}`);
-    } else {
-      console.error(`Network or other error: ${error.message}`);
-    }
   })
+    .then(response => {
+      console.log('Registration successful');
+      router.push('/login');
+    })
+    .catch(error => {
+      if (error.response.status === 401) {
+        const {message} = error.response.data;
+        errorMessage.value = message;
+        console.error(`Server error: ${message}`);
+      } else {
+        console.error(`Network or other error: ${error.message}`);
+      }
+    })
 };
 </script>
 
@@ -154,9 +156,11 @@ button:hover {
   .register-view {
     margin: 30px auto;
   }
+
   h1 {
     font-size: 32px;
   }
+
   input, button {
     font-size: 16px;
   }
@@ -166,9 +170,11 @@ button:hover {
   .register-view {
     margin: 50px auto;
   }
+
   h1 {
     font-size: 32px;
   }
+
   input, button {
     font-size: 16px;
   }
