@@ -10,6 +10,10 @@ const props = defineProps({
     type: Number,
     required: true,
   },
+  onPointClickHandler: {
+    type: Function,
+    required: true,
+  }
 });
 
 const {rValue} = toRefs(props);
@@ -127,8 +131,45 @@ const drawGraph = (rValue) => {
   drawTriangle();
 };
 
+const drawPoint = (x, y, hit) => {
+  const canvas = canvasRef.value;
+  const context = canvas.getContext("2d");
+  const canvasWidth = canvas.width;
+  const canvasHeight = canvas.height;
+  const centerX = canvasWidth / 2;
+  const centerY = canvasHeight / 2;
+  const scale = (rValue.value / 2.5) * centerX;
+
+  const pointX = centerX + (x / rValue.value) * scale;
+  const pointY = centerY - (y / rValue.value) * scale;
+
+  context.beginPath();
+  context.arc(pointX, pointY, 3, 0, 2 * Math.PI);
+  context.fillStyle = hit ? "green" : "red";
+  context.fill();
+};
+
+
 const handleClick = (event) => {
-  console.log("Canvas clicked", event);
+  const canvas = canvasRef.value;
+  const rect = canvas.getBoundingClientRect();
+  const x = event.clientX - rect.left;
+  const y = event.clientY - rect.top;
+
+  const canvasWidth = canvas.width;
+  const canvasHeight = canvas.height;
+  const centerX = canvasWidth / 2;
+  const centerY = canvasHeight / 2;
+  const scale = (rValue.value / 2.5) * centerX;
+
+  const graphX = ((x - centerX) / scale) * rValue.value;
+  const graphY = ((centerY - y) / scale) * rValue.value;
+
+  console.log(graphX, graphY);
+
+  props.onPointClickHandler(graphX, graphY, (hit) => {
+    drawPoint(graphX, graphY, hit);
+  });
 };
 
 onMounted(() => {

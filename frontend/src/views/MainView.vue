@@ -1,5 +1,5 @@
 <script setup>
-import {ref, onMounted} from 'vue';
+import {ref, watchEffect} from 'vue';
 import Canvas from "@/components/Canvas.vue";
 import {useRouter} from "vue-router";
 import {useAuthenticationStore} from "@/store/authentication.store.js";
@@ -20,6 +20,17 @@ const authenticationStore = useAuthenticationStore();
 const rangeX = [-2, -1.5, -1, -0.5, 0, 0.5, 1, 1.5, 2];
 const rangeR = [0, 0.5, 1, 1.5, 2];
 
+const handleCanvasClick = (x, y, callback) => {
+  form.value.x = parseFloat(x.toFixed(2));
+  form.value.y = y.toFixed(2);
+
+  if (!validateForm()) {
+    return;
+  }
+
+  sendSavingPointRequest(callback);
+};
+
 const handleSubmit = async () => {
   if (!validateForm()) {
     return
@@ -28,7 +39,7 @@ const handleSubmit = async () => {
   await sendSavingPointRequest();
 }
 
-const sendSavingPointRequest = async () => {
+const sendSavingPointRequest = async (callback) => {
   const data = {
     x: form.value.x,
     y: parseFloat(form.value.y),
@@ -49,6 +60,10 @@ const sendSavingPointRequest = async () => {
         r: data.r,
         hit: hit,
       };
+
+      if (callback) {
+        callback(hit);
+      }
 
       results.value.push(point);
     })
@@ -91,7 +106,8 @@ const validateForm = () => {
 }
 
 const validateX = () => {
-  if (!rangeX.includes(form.value.x)) {
+  const x = form.value.x;
+  if (x < Math.min(...rangeX) || x > Math.max(...rangeX)) {
     errors.value.x = 'X должен быть выбран из списка допустимых значений';
   } else {
     errors.value.x = '';
@@ -115,7 +131,11 @@ const validateR = () => {
   }
 }
 
-onMounted(loadPreviousResults);
+watchEffect(() => {
+  if (authenticationStore.isAuthenticated) {
+    loadPreviousResults()
+  }
+});
 </script>
 
 <template>
@@ -157,7 +177,7 @@ onMounted(loadPreviousResults);
       </section>
 
       <section class="graph-section">
-        <Canvas :rValue="form.r"/>
+        <Canvas :rValue="form.r" :onPointClickHandler="handleCanvasClick"/>
       </section>
     </main>
 
