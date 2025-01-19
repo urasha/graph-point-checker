@@ -12,7 +12,7 @@ Includes:
 
 ### Usage
 ```
-git clone git@github.com:urasha/WEB_SPRING-VUE.git
+git clone https://github.com/urasha/WEB_SPRING-VUE.git
 cd WEB_SPRING-VUE
 ./start.sh
 ```
