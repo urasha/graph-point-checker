@@ -11,7 +11,12 @@ const errorMessage = ref('');
 const router = useRouter();
 
 const handleRegister = async () => {
-  if (!validateForm()) {
+  if (checkPasswordIdentity() === false) {
+    errorMessage.value = 'Пароли не совпадают!';
+    return
+  }
+
+  if (validateFormValues() === false) {
     errorMessage.value = 'Логин и пароль не могут быть пустыми!'
     return;
   }
@@ -19,8 +24,12 @@ const handleRegister = async () => {
   await tryRegister();
 };
 
-const validateForm = () => {
-  return username.value && password.value && password.value === confirmPassword.value;
+const checkPasswordIdentity = () => {
+  return password.value === confirmPassword.value;
+}
+
+const validateFormValues = () => {
+  return username.value && password.value;
 };
 
 const tryRegister = async () => {

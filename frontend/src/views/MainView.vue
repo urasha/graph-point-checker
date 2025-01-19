@@ -3,6 +3,7 @@ import {ref, onMounted} from 'vue';
 import Canvas from "@/components/Canvas.vue";
 import {useRouter} from "vue-router";
 import {useAuthenticationStore} from "@/store/authentication.store.js";
+import axios from "axios";
 
 const form = ref({x: 1, y: '', r: 2});
 const results = ref([]);
@@ -19,7 +20,31 @@ const handleSubmit = async () => {
     return;
   }
 
-  // TODO: try to send point to PointMicroService
+  const data = {
+    x: form.value.x,
+    y: parseFloat(form.value.y),
+    r: form.value.r,
+  };
+
+  const headers = {
+    'Authorization': `Bearer ${localStorage.getItem('jwt')}`,
+    'Content-Type': 'application/json',
+  };
+
+  axios.post('/api/points/save', data, {headers})
+    .then(response => {
+      const {hit} = response.data;
+      const point = {
+        x: data.x,
+        y: data.y,
+        r: data.r,
+        hit: hit,
+      };
+
+      results.value.push(point);
+    }).catch(error => {
+    console.log(`Submit point error: ${error}`);
+  })
 }
 
 const loadPreviousResults = async () => {

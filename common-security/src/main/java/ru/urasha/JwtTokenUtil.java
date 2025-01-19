@@ -12,9 +12,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Service;
 
 import java.security.Key;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -39,22 +37,14 @@ public class JwtTokenUtil {
         key = Keys.hmacShaKeyFor(SECRET_KEY.getBytes());
     }
 
-    public String generateToken(String username) {
+    public String generateToken(Long userId, String username) {
         return Jwts.builder()
                 .setSubject(username)
+                .claim("userId", userId)
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
                 .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
-    }
-
-    public String getUsernameFromToken(String token) {
-        Claims claims = Jwts.parserBuilder()
-                .setSigningKey(key)
-                .build()
-                .parseClaimsJws(token)
-                .getBody();
-        return claims.getSubject();
     }
 
     public boolean validateToken(String token) {
@@ -66,15 +56,26 @@ public class JwtTokenUtil {
         }
     }
 
-    public List<GrantedAuthority> getRolesFromToken(String token) {
+    public String getUsernameFromToken(String token) {
         Claims claims = Jwts.parserBuilder()
                 .setSigningKey(key)
                 .build()
                 .parseClaimsJws(token)
                 .getBody();
-        String roles = claims.get("roles", String.class);
-        return Arrays.stream(roles.split(","))
-                .map(SimpleGrantedAuthority::new)
-                .collect(Collectors.toList());
+        return claims.getSubject();
+    }
+
+    public List<GrantedAuthority> getRolesFromToken(String token) {
+        return List.of(new SimpleGrantedAuthority("ROLE_USER"));
+    }
+
+    public Long getUserIdFromToken(String token) {
+        Claims claims = Jwts.parserBuilder()
+                .setSigningKey(key)
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
+
+        return claims.get("userId", Long.class);
     }
 }

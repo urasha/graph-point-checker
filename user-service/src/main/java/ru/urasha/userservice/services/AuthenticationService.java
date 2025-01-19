@@ -30,7 +30,7 @@ public class AuthenticationService {
 
     public Optional<String> login(UserAccount userAccount) {
         Optional<UserAccount> foundUser = userAccountRepository.findByUsername(userAccount.getUsername());
-        return foundUser.map(account -> jwtTokenUtil.generateToken(account.getUsername()));
+        return foundUser.map(account -> jwtTokenUtil.generateToken(account.getId(), account.getUsername()));
     }
 
     public void register(UserAccount userAccount) throws BadCredentialsException {
