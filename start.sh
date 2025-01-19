@@ -10,5 +10,5 @@ cd point-service
 mvn clean package
 cd ..
 
-docker-compose build --no-cache
+docker-compose build
 docker-compose up

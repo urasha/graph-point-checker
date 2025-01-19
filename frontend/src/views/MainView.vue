@@ -177,7 +177,7 @@ watchEffect(() => {
       </section>
 
       <section class="graph-section">
-        <Canvas :rValue="form.r" :onPointClickHandler="handleCanvasClick"/>
+        <Canvas :rValue="form.r" :points="results" :onPointClickHandler="handleCanvasClick"/>
       </section>
     </main>
 

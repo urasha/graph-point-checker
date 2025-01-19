@@ -3,24 +3,28 @@
 </template>
 
 <script setup>
-import {ref, watch, onMounted, toRefs} from "vue";
+import {ref, watch, onMounted, toRefs, watchEffect} from "vue";
 
 const props = defineProps({
   rValue: {
     type: Number,
     required: true,
   },
+  points: {
+    type: Array,
+    required: true,
+  },
   onPointClickHandler: {
     type: Function,
     required: true,
-  }
+  },
 });
 
-const {rValue} = toRefs(props);
+const {rValue, points, onPointClickHandler} = toRefs(props);
 
 const canvasRef = ref(null);
 
-const drawGraph = (rValue) => {
+const drawGraph = (r) => {
   const canvas = canvasRef.value;
 
   if (!canvas) {
@@ -32,7 +36,7 @@ const drawGraph = (rValue) => {
   const canvasHeight = canvas.height;
   const centerX = canvasWidth / 2;
   const centerY = canvasHeight / 2;
-  const scale = (rValue / 2.5) * centerX;
+  const scale = (r / 2.5) * centerX;
 
   const clearCanvas = () => {
     context.clearRect(0, 0, canvasWidth, canvasHeight);
@@ -149,7 +153,6 @@ const drawPoint = (x, y, hit) => {
   context.fill();
 };
 
-
 const handleClick = (event) => {
   const canvas = canvasRef.value;
   const rect = canvas.getBoundingClientRect();
@@ -167,10 +170,28 @@ const handleClick = (event) => {
 
   console.log(graphX, graphY);
 
-  props.onPointClickHandler(graphX, graphY, (hit) => {
+  onPointClickHandler.value(graphX, graphY, (hit) => {
     drawPoint(graphX, graphY, hit);
   });
 };
+
+const drawPoints = (allPoints) => {
+  const canvas = canvasRef.value;
+  if (!canvas) {
+    console.log("Canvas not found");
+    return;
+  }
+
+  allPoints.forEach((point) => {
+    drawPoint(point.x, point.y, point.hit);
+  });
+};
+
+watchEffect(() => {
+  if (points.value && points.value.length > 0) {
+    drawPoints(points.value);
+  }
+});
 
 onMounted(() => {
   drawGraph(rValue.value);
@@ -178,6 +199,7 @@ onMounted(() => {
 
 watch(rValue, (newRValue) => {
   drawGraph(newRValue);
+  drawPoints(points.value);
 });
 </script>
 
