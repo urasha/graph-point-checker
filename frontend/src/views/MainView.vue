@@ -7,7 +7,12 @@ import axios from "axios";
 
 const form = ref({x: 1, y: '', r: 2});
 const results = ref([]);
-const error = ref('');
+const commonError = ref('');
+const errors = ref({
+  x: '',
+  y: '',
+  r: '',
+});
 
 const router = useRouter();
 const authenticationStore = useAuthenticationStore();
@@ -16,10 +21,14 @@ const rangeX = [-2, -1.5, -1, -0.5, 0, 0.5, 1, 1.5, 2];
 const rangeR = [0, 0.5, 1, 1.5, 2];
 
 const handleSubmit = async () => {
-  if (error.value) {
-    return;
+  if (!validateForm()) {
+    return
   }
 
+  await sendSavingPointRequest();
+}
+
+const sendSavingPointRequest = async () => {
   const data = {
     x: form.value.x,
     y: parseFloat(form.value.y),
@@ -42,22 +51,30 @@ const handleSubmit = async () => {
       };
 
       results.value.push(point);
-    }).catch(error => {
-    console.log(`Submit point error: ${error}`);
-  })
+    })
+    .catch(error => {
+      commonError.value = 'Не удалось сохранить точку';
+      console.error(`Submit point error: ${error}`);
+    });
 }
 
 const loadPreviousResults = async () => {
-  try {
-    /*
-    // TODO:
-    // if user is not authenticated -> logout()
-    // else: try to load all point from current user into the table
-    */
-  } catch (err) {
-    error.value = 'Ошибка загрузки данных';
-  }
-};
+  commonError.value = '';
+
+  const headers = {
+    'Authorization': `Bearer ${localStorage.getItem('jwt')}`,
+  };
+
+  axios.get('/api/points', {headers})
+    .then(response => {
+      const {points} = response.data;
+      results.value.push(...points);
+    })
+    .catch(error => {
+      commonError.value = 'Ошибка загрузки данных';
+      console.error(`Load previous results error: ${error}`);
+    });
+}
 
 const logout = () => {
   localStorage.removeItem('jwt');
@@ -65,12 +82,36 @@ const logout = () => {
   router.push('/login');
 }
 
+const validateForm = () => {
+  validateX();
+  validateY();
+  validateR();
+
+  return !(errors.value.x || errors.value.y || errors.value.r);
+}
+
+const validateX = () => {
+  if (!rangeX.includes(form.value.x)) {
+    errors.value.x = 'X должен быть выбран из списка допустимых значений';
+  } else {
+    errors.value.x = '';
+  }
+}
+
 const validateY = () => {
   const y = parseFloat(form.value.y);
   if (isNaN(y) || y < -5 || y > 5) {
-    error.value = 'Y должен быть числом в диапазоне -5...5';
+    errors.value.y = 'Y должен быть числом в диапазоне -5...5';
   } else {
-    error.value = '';
+    errors.value.y = '';
+  }
+}
+
+const validateR = () => {
+  if (!rangeR.includes(form.value.r)) {
+    errors.value.r = 'R должен быть выбран из списка допустимых значений';
+  } else {
+    errors.value.r = '';
   }
 }
 
@@ -90,7 +131,7 @@ onMounted(loadPreviousResults);
         <form @submit.prevent="handleSubmit" class="input-form">
           <label>
             X:
-            <select v-model="form.x" required class="select-input">
+            <select v-model="form.x" required @change="validateX" class="select-input">
               <option v-for="option in rangeX" :key="option" :value="option">{{ option }}</option>
             </select>
           </label>
@@ -102,14 +143,17 @@ onMounted(loadPreviousResults);
 
           <label>
             R:
-            <select v-model="form.r" required class="select-input">
+            <select v-model="form.r" required @change="validateR" class="select-input">
               <option v-for="option in rangeR" :key="option" :value="option">{{ option }}</option>
             </select>
           </label>
           <button type="submit" class="submit-button">Отправить</button>
         </form>
 
-        <p v-if="error" class="error">{{ error }}</p>
+        <p v-if="commonError" class="error">{{ commonError }}</p>
+        <p v-if="errors.x" class="error">{{ errors.x }}</p>
+        <p v-if="errors.y" class="error">{{ errors.y }}</p>
+        <p v-if="errors.r" class="error">{{ errors.r }}</p>
       </section>
 
       <section class="graph-section">
