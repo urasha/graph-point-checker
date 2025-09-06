@@ -12,8 +12,8 @@ Key features include:
 
 ### 🛠️ Usage
 ```
-git clone https://github.com/urasha/Graph_Point_Checker.git
-cd Graph_Point_Checker
+git clone https://github.com/urasha/graph-point-checker.git
+cd graph-point-checker
 ./start.sh
 ```
 and go to [http://localhost:80](http://localhost:80) after docker will start up
